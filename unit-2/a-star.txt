@@ -1,0 +1,31 @@
+> A
+> D
+> B
+> E
+> C
+> F
+> G
+>
+Declared nodes: S, A, D, B, E, C, F, G
+Neighbors for S (format: B:2, C, D:4) > A:2,D:5
+Declared nodes: S, A, D, B, E, C, F, G
+Neighbors for A (format: B:2, C, D:4) > S:2,D:2,B:1
+Declared nodes: S, A, D, B, E, C, F, G
+Neighbors for D (format: B:2, C, D:4) > S:5, A:2, E:2
+Declared nodes: S, A, D, B, E, C, F, G
+Neighbors for B (format: B:2, C, D:4) > A:1, E:5, C:4
+Declared nodes: S, A, D, B, E, C, F, G
+Neighbors for E (format: B:2, C, D:4) > D:2, B:5, F:4
+Declared nodes: S, A, D, B, E, C, F, G
+Neighbors for C (format: B:2, C, D:4) > B:4
+Declared nodes: S, A, D, B, E, C, F, G
+Neighbors for F (format: B:2, C, D:4) > E:4, G:3
+Declared nodes: S, A, D, B, E, C, F, G
+Neighbors for G (format: B:2, C, D:4) > F:3
+Start node (default: S) > S
+Goal node (default: G) > G
+Path: S -> A -> D -> E -> F -> G
+Cost: 13
+
+
+ex: 2
