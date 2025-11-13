@@ -29,3 +29,27 @@ Cost: 13
 
 
 ex: 2
+
+> A
+> B
+> D
+> E
+> F
+> C
+>
+Declared nodes: A, B, D, E, F, C
+Neighbors for A (format: B:2, C, D:4) > B:2, D:8
+Declared nodes: A, B, D, E, F, C
+Neighbors for B (format: B:2, C, D:4) > A:2, D:5, E:6
+Declared nodes: A, B, D, E, F, C
+Neighbors for D (format: B:2, C, D:4) > A:8, B:5, E:3, F:2
+Declared nodes: A, B, D, E, F, C
+Neighbors for E (format: B:2, C, D:4) > B:6, D:3, F:1, C:9
+Declared nodes: A, B, D, E, F, C
+Neighbors for F (format: B:2, C, D:4) > D:2, E:1, C:3
+Declared nodes: A, B, D, E, F, C
+Neighbors for C (format: B:2, C, D:4) > E:9, F:3
+Start node (default: A) > A
+Goal node (default: C) > C
+Path: A -> B -> D -> F -> C
+Cost: 12

@@ -1,14 +1,12 @@
 /**
- * A* Algorithm - Minimal Version
- * Simple implementation for learning
+ * Dijkstra's Algorithm - Interactive Version
+ * Find shortest path from start to goal node
  */
 
 class Node {
   constructor(name) {
     this.name = name;
-    this.g = Infinity;
-    this.h = 0;
-    this.f = Infinity;
+    this.distance = Infinity;
     this.parent = null;
     this.neighbors = [];
   }
@@ -18,54 +16,61 @@ class Node {
   }
 }
 
-class AStar {
+class Dijkstra {
   search(start, goal) {
-    const open = [start];
-    const closed = [];
-    start.g = 0;
-
-    while (open.length > 0) {
-      // Find node with lowest f
-      let current = open[0];
-      let idx = 0;
-      for (let i = 1; i < open.length; i++) {
-        if (open[i].f < current.f) {
-          current = open[i];
-          idx = i;
+    const unvisited = new Set();
+    const visited = new Set();
+    
+    // Collect all nodes reachable from start
+    const queue = [start];
+    start.distance = 0;
+    
+    while (queue.length > 0) {
+      // Find unvisited node with minimum distance
+      let current = null;
+      let minDist = Infinity;
+      
+      for (const node of queue) {
+        if (!visited.has(node) && node.distance < minDist) {
+          current = node;
+          minDist = node.distance;
         }
       }
-
-      if (current === goal) {
-        const path = [];
-        let node = current;
-        while (node) {
-          path.unshift(node.name);
-          node = node.parent;
-        }
-        return path;
-      }
-
-      open.splice(idx, 1);
-      closed.push(current);
-
+      
+      if (!current || current === goal) break;
+      
+      visited.add(current);
+      
+      // Update neighbors
       for (const { node: neighbor, cost } of current.neighbors) {
-        if (closed.includes(neighbor)) continue;
-
-        const newG = current.g + cost;
-        if (!open.includes(neighbor)) open.push(neighbor);
-        else if (newG >= neighbor.g) continue;
-
-        neighbor.parent = current;
-        neighbor.g = newG;
-        neighbor.h = 0; // Simple heuristic
-        neighbor.f = neighbor.g + neighbor.h;
+        if (visited.has(neighbor)) continue;
+        
+        const newDistance = current.distance + cost;
+        if (newDistance < neighbor.distance) {
+          neighbor.distance = newDistance;
+          neighbor.parent = current;
+          if (!queue.includes(neighbor)) {
+            queue.push(neighbor);
+          }
+        }
       }
     }
-    return [];
+    
+    // Reconstruct path
+    if (goal.distance === Infinity) {
+      return [];
+    }
+    
+    const path = [];
+    let node = goal;
+    while (node) {
+      path.unshift(node.name);
+      node = node.parent;
+    }
+    return path;
   }
 }
 
-// === EXAMPLE: S to G ===
 const readline = require("readline");
 
 // Interactive mode: collect nodes and edges from user input.
@@ -76,7 +81,7 @@ const readline = require("readline");
 //    (cost is optional; default cost is 1). If you enter a neighbor name that
 //    wasn't declared previously it will be auto-created.
 // 3) After graph entry you'll be asked for start and goal node names (defaults
-//    to the first and last node entered). The program then runs A* and prints
+//    to the first and last node entered). The program then runs Dijkstra and prints
 //    the path and total cost.
 
 async function mainInteractive() {
@@ -99,7 +104,7 @@ async function mainInteractive() {
     }
   }
 
-  // If user entered no nodes, fall back to the example graph from before.
+  // If user entered no nodes, fall back to the example graph.
   if (order.length === 0) {
     console.log("No nodes entered. Using default example graph.");
     const defaultNodes = {
@@ -153,22 +158,6 @@ async function mainInteractive() {
     }
   }
 
-  // Ask if user wants to use heuristic costs
-  const useHeuristic = (await question("Use heuristic costs? (y/n) > ")).trim().toLowerCase() === 'y';
-  if (useHeuristic) {
-    console.log("Enter heuristic cost for each node (estimated cost to goal):");
-    for (const name of order) {
-      const hValue = (await question(`Heuristic for ${name} > `)).trim();
-      const parsed = Number(hValue);
-      if (!Number.isNaN(parsed) && parsed >= 0) {
-        nodes[name].h = parsed;
-      } else {
-        console.log(`Invalid heuristic for ${name}. Using 0.`);
-        nodes[name].h = 0;
-      }
-    }
-  }
-
   // Choose start and goal
   const defaultStart = order[0];
   const defaultGoal = order[order.length - 1];
@@ -183,7 +172,7 @@ async function mainInteractive() {
     return;
   }
 
-  const path = new AStar().search(nodes[startName], nodes[goalName]);
+  const path = new Dijkstra().search(nodes[startName], nodes[goalName]);
   if (path.length === 0) {
     console.log(`No path found from ${startName} to ${goalName}.`);
     rl.close();
@@ -204,5 +193,39 @@ async function mainInteractive() {
   rl.close();
 }
 
-// Run interactive main
-mainInteractive().catch(err => console.error(err));
+// If user passed --default, run the built-in example non-interactively.
+if (process.argv.includes("--default")) {
+  const nodes = {
+    S: new Node("S"),
+    A: new Node("A"),
+    B: new Node("B"),
+    C: new Node("C"),
+    D: new Node("D"),
+    E: new Node("E"),
+    F: new Node("F"),
+    G: new Node("G")
+  };
+  const edges = [
+    ["S", "A", 2], ["S", "D", 5],
+    ["A", "B", 2], ["A", "D", 2],
+    ["B", "C", 4], ["B", "E", 5],
+    ["D", "E", 2], ["E", "F", 4],
+    ["F", "G", 3]
+  ];
+  edges.forEach(([a, b, cost]) => {
+    nodes[a].addEdge(nodes[b], cost);
+    nodes[b].addEdge(nodes[a], cost);
+  });
+  const path = new Dijkstra().search(nodes.S, nodes.G);
+  console.log("Path:", path.join(" -> "));
+  let cost = 0;
+  for (let i = 0; i < path.length - 1; i++) {
+    const edge = nodes[path[i]].neighbors.find(n => n.node.name === path[i + 1]);
+    cost += edge.cost;
+  }
+  console.log("Cost:", cost);
+  process.exit(0);
+} else {
+  // Run interactive main
+  mainInteractive().catch(err => console.error(err));
+}
